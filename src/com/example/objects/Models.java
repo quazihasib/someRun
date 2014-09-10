@@ -17,6 +17,7 @@ import org.andengine.util.modifier.IModifier;
 import org.andengine.util.modifier.IModifier.IModifierListener;
 
 import com.example.objectpool.ObjectsPool;
+import com.example.objectpool.ProjectilesPool;
 import com.example.objectpool.TargetsPool;
 import com.example.some.MainActivity;
 
@@ -79,6 +80,7 @@ public class Models
 			return;
 
 		final Sprite projectile;
+		MainActivity.pPool = new ProjectilesPool(MainActivity.mProjectileTextureRegion);
 		// position the projectile on the player
 		projectile = MainActivity.pPool.obtainPoolItem();
 		projectile.setPosition(
@@ -133,6 +135,8 @@ public class Models
 		MainActivity.mScene.attachChild(projectile);
 
 		MainActivity.player.animate(50, false);
+//		MainActivity.player.animate(new long[] { 100, 100, 100, 100, 100, 100,
+//				100, 100, 100, 100, 100 }, 23, 33, false);
 	}
 
 	public static void createHero()

@@ -122,16 +122,16 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		{
 			if(MultiTouch.isSupportedDistinct(this))
 			{
-				Toast.makeText(this, "MultiTouch detected controls will work properly!", Toast.LENGTH_SHORT).show();
+				//Toast.makeText(this, "MultiTouch detected controls will work properly!", Toast.LENGTH_SHORT).show();
 			} 
 			else 
 			{
-				Toast.makeText(this, "MultiTouch detected, but your device has problems distinguishing between fingers.\n\nControls are placed at different vertical locations.", Toast.LENGTH_LONG).show();
+				//Toast.makeText(this, "MultiTouch detected, but your device has problems distinguishing between fingers.\n\nControls are placed at different vertical locations.", Toast.LENGTH_LONG).show();
 			}
 		} 
 		else 
 		{
-			Toast.makeText(this, "Sorry your device does NOT support MultiTouch!\n\n(Falling back to SingleTouch.)\n\nControls are placed at different vertical locations.", Toast.LENGTH_LONG).show();
+			//Toast.makeText(this, "Sorry your device does NOT support MultiTouch!\n\n(Falling back to SingleTouch.)\n\nControls are placed at different vertical locations.", Toast.LENGTH_LONG).show();
 		}
 		
 		return en;
@@ -246,6 +246,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		mEngine.registerUpdateHandler(new FPSLogger());
 		
 		mScene = new Scene();
+		
 		final AutoParallaxBackground autoParallaxBackground = new AutoParallaxBackground(0, 0, 0, 5);
 		vertexBufferObjectManager = this.getVertexBufferObjectManager();
 		autoParallaxBackground.attachParallaxEntity(new ParallaxEntity(0.0f, new Sprite(0, CAMERA_HEIGHT - this.mParallaxLayerBack.getHeight(), this.mParallaxLayerBack, vertexBufferObjectManager)));
@@ -322,20 +323,24 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
 		// starting background music
 		backgroundMusic.play();
-		runningFlag = true;
-
+//		runningFlag = true;
+//		pauseFlag = false;
+		
 		controller.restart(this);
 
 		return mScene;
 	}
 
 	@Override
-	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
+	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) 
+	{
 		// TODO Auto-generated method stub
-		if (pSceneTouchEvent.getAction() == TouchEvent.ACTION_DOWN) 
+		if(pSceneTouchEvent.getAction() == TouchEvent.ACTION_DOWN) 
 		{
-//			Models.shootProjectile(touchX, touchY);
-			Controller.jump(player);
+			final float touchX = pSceneTouchEvent.getX();
+			final float touchY = pSceneTouchEvent.getY();
+			Models.shootProjectile(touchX, touchY);
+//			Controller.jump(player);
 			
 			return true;
 		}
@@ -346,10 +351,10 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 	// pauses the music and the game when the game goes to the background
 	protected void onPause() 
 	{
-		if (runningFlag) 
+		if(runningFlag) 
 		{
 			pauseMusic();
-			if (mEngine.isRunning()) 
+			if(mEngine.isRunning()) 
 			{
 				pauseGame();
 				pauseFlag = true;
@@ -363,21 +368,21 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 	{
 		super.onResumeGame();
 		// shows this Toast when coming back to the game
-		if(runningFlag) 
+		if(runningFlag==true) 
 		{
-			if(pauseFlag) 
+			if(pauseFlag==true) 
 			{
 				pauseFlag = false;
 				Toast.makeText(this, "Menu button to resume",
 						Toast.LENGTH_SHORT).show();
 			} 
-			else 
-			{
-				// in case the user clicks the home button while the game on the
-				// resultScene
-				resumeMusic();
-				mEngine.stop();
-			}
+//			else 
+//			{
+//				// in case the user clicks the home button while the game on the
+//				// resultScene
+//				resumeMusic();
+//				mEngine.stop();
+//			}
 		} 
 		else 
 		{
@@ -401,7 +406,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
 	public void pauseGame()
 	{
-		if (runningFlag) 
+		if(runningFlag) 
 		{
 			mScene.setChildScene(mPauseScene, false, true, true);
 			mEngine.stop();
@@ -417,9 +422,9 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 	public boolean onKeyDown(final int pKeyCode, final KeyEvent pEvent)
 	{
 		// if menu button is pressed
-		if (pKeyCode == KeyEvent.KEYCODE_MENU && pEvent.getAction() == KeyEvent.ACTION_DOWN)
+		if(pKeyCode == KeyEvent.KEYCODE_MENU && pEvent.getAction() == KeyEvent.ACTION_DOWN)
 		{
-			if (mEngine.isRunning() && backgroundMusic.isPlaying()) 
+			if(mEngine.isRunning() && backgroundMusic.isPlaying()) 
 			{
 				pauseMusic();
 				pauseFlag = true;
