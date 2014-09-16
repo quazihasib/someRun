@@ -26,6 +26,7 @@ public class ObjectsPool extends GenericPool<Sprite> {
 	protected Sprite onAllocatePoolItem() {
 		return new Sprite(0, 0, mTextureRegion.deepCopy(), MainActivity.vertexBufferObjectManager);
 	}
+	//test
 
 	/** Called when a projectile is sent to the pool */
 	protected void onHandleRecycleItem(final Sprite projectile) {
