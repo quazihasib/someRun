@@ -7,7 +7,10 @@ import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.util.HorizontalAlign;
 
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.opengl.GLES20;
+import android.preference.PreferenceManager;
 
 public class Util 
 {
@@ -39,5 +42,21 @@ public class Util
 		titleText.registerEntityModifier(new ScaleModifier(2, 0.0f, 1.0f));
 		MainActivity.mScene.attachChild(titleText);
 	}
+	
+	public static int loadSavedPreferences(String key)
+	{
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.instance);
+		return sharedPreferences.getInt(key, 0);
+	}
+	
+	
+	public static void savePreferences(String key, int value)
+	{
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.instance);
+		Editor editor = sharedPreferences.edit();
+		editor.putInt(key, value);
+		editor.commit();
+	}
+
 
 }

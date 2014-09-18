@@ -126,6 +126,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
     public static Font mFont;
     public static int mScore = 0;
     public static Text mScoreText;
+    public static MainActivity instance;
 	
 	@Override
 	public EngineOptions onCreateEngineOptions() 
@@ -138,6 +139,8 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		en.getAudioOptions().setNeedsSound(true).setNeedsMusic(true);
 		en.getTouchOptions().setNeedsMultiTouch(true);
 
+		instance = this;
+		
 //		mEngine = new Engine(en);
 		if(MultiTouch.isSupported(this))
 		{
@@ -275,8 +278,8 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		}
 		
 		FontFactory.setAssetBasePath("font/");
-		this.mFont = FontFactory.createFromAsset(this.getFontManager(), this.getTextureManager(), 512, 512, TextureOptions.BILINEAR, this.getAssets(), "Plok.ttf", 32, true, Color.WHITE);
-		this.mFont.load();
+		mFont = FontFactory.createFromAsset(this.getFontManager(), this.getTextureManager(), 512, 512, TextureOptions.BILINEAR, this.getAssets(), "Plok.ttf", 32, true, Color.WHITE);
+		mFont.load();
 	}
 
 	@Override
