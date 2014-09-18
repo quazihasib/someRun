@@ -345,12 +345,8 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 //		score.setPosition(mCamera.getWidth() - score.getWidth() - 5, 5);
 
 		//adding enemies, objects
-		createSpriteSpawnTimeHandler();
+		startGame();
 		
-		Enemy1Pool.checkCollisionEnemy1();
-		ObjectsPool.checkCollisionObject();
-		Enemy2Pool.checkCollisionEnemy2();
-
 		// starting background music
 		backgroundMusic.play();
 //		runningFlag = true;
@@ -361,8 +357,14 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		return mScene;
 	}
 
-	public void createSpriteSpawnTimeHandler()
+	public void startGame()
 	{
+		
+		Enemy1Pool.checkCollisionEnemy1();
+		ObjectsPool.checkCollisionObject();
+		Enemy2Pool.checkCollisionEnemy2();
+		
+		
 		TimerHandler spriteTimerHandler;
 		float mEffectSpawnDelay = 1f;
 
@@ -372,8 +374,8 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 					public void onTimePassed(TimerHandler pTimerHandler) 
 					{
 						Models.addEnemy1();
-						//Models.addEnemy2();
-						//Models.addObjects();
+						Models.addEnemy2();
+						Models.addObjects();
 					}
 				});
 
