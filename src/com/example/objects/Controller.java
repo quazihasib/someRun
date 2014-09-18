@@ -19,182 +19,24 @@ public class Controller
 {
 
 	public Context context;
-	public IUpdateHandler detect;
-	public IUpdateHandler detect1;
 	
 	public Controller(Context con)
 	{
 		this.context = con;
 	}
 	
-	/** a Time Handler for spawning targets, triggers every 1 second */
-	public void createSpriteSpawnTimeHandler()
+	public static void playerAnimate()
 	{
-		TimerHandler spriteTimerHandler;
-		float mEffectSpawnDelay = 1f;
-
-		spriteTimerHandler = new TimerHandler(mEffectSpawnDelay, true, new ITimerCallback()
-		{
-					@Override
-					public void onTimePassed(TimerHandler pTimerHandler) 
-					{
-						Models.addTarget();
-						Models.addObjects();
-					}
-				});
-
-		MainActivity.mScene.registerUpdateHandler(spriteTimerHandler);
-	}  
-
-	public void checkCollision()
-	{
-		
-		/** TimerHandler for collision detection and cleaning up */
-		detect = new IUpdateHandler() 
-		{
-			@Override
-			public void reset() 
-			{
-				
-			}
-
-			@Override
-			public void onUpdate(float pSecondsElapsed) 
-			{
-
-				Iterator<AnimatedSprite> targets = MainActivity.targetLL.iterator();
-				AnimatedSprite _target;
-				boolean hit = false;
-
-				// iterating over the targets
-				while (targets.hasNext()) 
-				{
-					_target = targets.next();
-
-					// if target passed the left edge of the screen, then remove
-					// it and call a fail
-					if (_target.getX() <= -_target.getWidth()) 
-					{
-						// removeSprite(_target, targets);
-						MainActivity.tPool.recyclePoolItem(_target);
-						targets.remove();
-						// fail();
-						break;
-					}
+		MainActivity.player.animate(new long[]{200, 200, 200}, 6, 8, true);
+		MainActivity.mScene.registerUpdateHandler(new TimerHandler(1,
+				new ITimerCallback() {
 					
-					Iterator<Sprite> projectiles = MainActivity.projectileLL.iterator();
-					Sprite _projectile;
-					// iterating over all the projectiles (bullets)
-					while (projectiles.hasNext())
-					{
-						_projectile = projectiles.next();
-
-						// in case the projectile left the screen
-						if(_projectile.getX() >= MainActivity.mCamera.getWidth()
-						||_projectile.getY() >= MainActivity.mCamera.getHeight()+_projectile.getHeight()
-						||_projectile.getY() <= -_projectile.getHeight()) 
-						{
-							MainActivity.pPool.recyclePoolItem(_projectile);
-							projectiles.remove();
-							continue;
-						}
-
-						// if the targets collides with a projectile, remove the
-						// projectile and set the hit flag to true
-						if (_target.collidesWith(_projectile)) 
-						{
-							MainActivity.pPool.recyclePoolItem(_projectile);
-							projectiles.remove();
-							hit = true;
-							break;
-						}
+					@Override
+					public void onTimePassed(TimerHandler pTimerHandler) {
+						// TODO Auto-generated method stub
+						MainActivity.player.animate(new long[]{200, 200, 200}, 3, 5, true);
 					}
-
-					// if a projectile hit the target, remove the target,
-					// increment the hit count, and update the score
-					if (hit) 
-					{
-						// removeSprite(_target, targets);
-						MainActivity.tPool.recyclePoolItem(_target);
-						targets.remove();
-						hit = false;
-						MainActivity.hitCount++;
-//						MainActivity.score.setText(String
-//								.valueOf(MainActivity.hitCount));
-					}
-				}
-
-				// if max score , then we are done
-				if(MainActivity.hitCount >= MainActivity.maxScore)
-				{
-					win();
-				}
-
-				// a work around to avoid ConcurrentAccessException
-				MainActivity.projectileLL.addAll(MainActivity.projectilesToBeAdded);
-				MainActivity.projectilesToBeAdded.clear();
-
-				MainActivity.targetLL.addAll(MainActivity.TargetsToBeAdded);
-				MainActivity.TargetsToBeAdded.clear();
-
-			}
-		};
-		MainActivity.mScene.registerUpdateHandler(detect);
-	}
-	
-	public void checkCollision1()
-	{
-		
-		/** TimerHandler for collision detection and cleaning up */
-		detect1 = new IUpdateHandler() 
-		{
-			@Override
-			public void reset() 
-			{
-				
-			}
-
-			@Override
-			public void onUpdate(float pSecondsElapsed) 
-			{
-
-				Iterator<Sprite> objects = MainActivity.objcetLL.iterator();
-				Sprite _object;
-
-				// iterating over the targets
-				while (objects.hasNext()) 
-				{
-					_object = objects.next();
-
-					// if target passed the left edge of the screen, then remove
-					// it and call a fail
-					if (_object.getX() <= -_object.getWidth()) 
-					{
-						// removeSprite(_target, targets);
-						MainActivity.oPool.recyclePoolItem(_object);
-						objects.remove();
-						// fail();
-						break;
-					}
-
-						// if the targets collides with a projectile, remove the
-						// projectile and set the hit flag to true
-						if (_object.collidesWith(MainActivity.player)) 
-						{
-							MainActivity.oPool.recyclePoolItem(_object);
-							objects.remove();
-							MainActivity.hitCount1++;
-							Log.d("asdasdasd","objects:"+MainActivity.hitCount1);
-							break;
-						}
-				}
-
-				MainActivity.objcetLL.addAll(MainActivity.objectsToBeAdded);
-				MainActivity.objectsToBeAdded.clear();
-
-			}
-		};
-		MainActivity.mScene.registerUpdateHandler(detect1);
+				}));
 	}
 	
 	public static void jump(AnimatedSprite sp)
@@ -213,7 +55,7 @@ public class Controller
 			@Override
 			public void onPathWaypointStarted(PathModifier arg0, IEntity arg1, int arg2) {
 				// TODO Auto-generated method stub
-				
+				MainActivity.player.animate(new long[] { 100, 100, 100}, 0, 2, true);
 			}
 			
 			@Override
@@ -231,7 +73,8 @@ public class Controller
 			@Override
 			public void onPathFinished(PathModifier arg0, IEntity arg1) {
 				// TODO Auto-generated method stub
-				
+				MainActivity.touch = false;
+				MainActivity.player.animate(new long[] { 100, 100, 100}, 3, 5, true);
 			}
 		}));
 	}
@@ -280,8 +123,12 @@ public class Controller
 //		MainActivity.score.setText(String.valueOf(MainActivity.hitCount));
 		MainActivity.projectileLL.clear();
 		MainActivity.projectilesToBeAdded.clear();
-		MainActivity.TargetsToBeAdded.clear();
-		MainActivity.targetLL.clear();
+		
+		MainActivity.TargetsToBeAddedEnemy1.clear();
+		MainActivity.targetLLEnemy1.clear();
+		
+		MainActivity.TargetsToBeAddedEnemy2.clear();
+		MainActivity.targetLLEnemy2.clear();
 	}
 
 }

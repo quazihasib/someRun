@@ -8,6 +8,8 @@ import org.andengine.audio.sound.Sound;
 import org.andengine.audio.sound.SoundFactory;
 import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
+import org.andengine.engine.handler.timer.ITimerCallback;
+import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
@@ -35,9 +37,10 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
 import org.andengine.util.debug.Debug;
 
+import com.example.objectpool.Enemy2Pool;
 import com.example.objectpool.ObjectsPool;
 import com.example.objectpool.ProjectilesPool;
-import com.example.objectpool.TargetsPool;
+import com.example.objectpool.Enemy1Pool;
 import com.example.objects.Controller;
 import com.example.objects.Models;
 
@@ -65,26 +68,30 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 	public static ITextureRegion mParallaxLayerMid;
 	public static ITextureRegion mParallaxLayerFront;
 	
-	public static BuildableBitmapTextureAtlas mPlayerBitmapTextureAtlas;
-	public static BuildableBitmapTextureAtlas mEnemyBitmapTextureAtlas;
-	public static TiledTextureRegion mPlayerTextureRegion;
-	public static TiledTextureRegion mEnemyTextureRegion;
-	public static TiledTextureRegion mProjectileTextureRegion;
-	public static TiledTextureRegion mPausedTextureRegion, mWinTextureRegion, 
-				  mFailTextureRegion;
+	public static BuildableBitmapTextureAtlas mPlayerBitmapTextureAtlas, 
+									 mEnemy1BitmapTextureAtlas, mEnemy2BitmapTextureAtlas;
 	
+	public static TiledTextureRegion mPlayerTextureRegion, mEnemy1TextureRegion,
+									 mEnemy2TextureRegion,
+									 mProjectileTextureRegion, mPausedTextureRegion,
+									 mWinTextureRegion, mFailTextureRegion;
 	
 	public static  VertexBufferObjectManager vertexBufferObjectManager;
 	
 	// our object pools
 	public static ProjectilesPool pPool;
-	public static TargetsPool tPool;
+	public static Enemy1Pool tPool;
 	public static ObjectsPool oPool;
+	public static Enemy2Pool e2Pool;
 
 	public static LinkedList<Sprite> projectileLL;
-	public static LinkedList<AnimatedSprite> targetLL;
 	public static LinkedList<Sprite> projectilesToBeAdded;
-	public static LinkedList<AnimatedSprite> TargetsToBeAdded;
+	
+	public static LinkedList<AnimatedSprite> targetLLEnemy1;
+	public static LinkedList<AnimatedSprite> TargetsToBeAddedEnemy1;
+	
+	public static LinkedList<AnimatedSprite> targetLLEnemy2;
+	public static LinkedList<AnimatedSprite> TargetsToBeAddedEnemy2;
 		
 	public static LinkedList<Sprite> objcetLL;
 	public static LinkedList<Sprite> objectsToBeAdded;
@@ -106,6 +113,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 	BitmapTextureAtlas mBitmapTextureAtlasPaused,mBitmapTextureAtlasWin,
 					   mBitmapTextureAtlasFail, mBitmapTextureAtlasProjectile;
 	
+	public static boolean touch;
 	@Override
 	public EngineOptions onCreateEngineOptions() 
 	{
@@ -175,9 +183,9 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		
 		//Player
 		mPlayerBitmapTextureAtlas = new BuildableBitmapTextureAtlas(
-		this.getTextureManager(), 1100, 100, TextureOptions.NEAREST);
+		this.getTextureManager(), 72, 128, TextureOptions.NEAREST);
 		mPlayerTextureRegion = BitmapTextureAtlasTextureRegionFactory.
-		createTiledFromAsset(mPlayerBitmapTextureAtlas, this, "hero.png", 11, 1);
+		createTiledFromAsset(mPlayerBitmapTextureAtlas, this, "player.png", 3, 4);
 		try
 		{
 			mPlayerBitmapTextureAtlas.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 0, 0));
@@ -189,14 +197,28 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		}
 		
 		//Enemy
-		mEnemyBitmapTextureAtlas = new BuildableBitmapTextureAtlas(
+		mEnemy1BitmapTextureAtlas = new BuildableBitmapTextureAtlas(
 		this.getTextureManager(), 211, 100, TextureOptions.NEAREST);
-		mEnemyTextureRegion = BitmapTextureAtlasTextureRegionFactory.
-		createTiledFromAsset(mEnemyBitmapTextureAtlas, this, "target.png", 3, 1);
+		mEnemy1TextureRegion = BitmapTextureAtlasTextureRegionFactory.
+		createTiledFromAsset(mEnemy1BitmapTextureAtlas, this, "target.png", 3, 1);
 		try
 		{
-			mEnemyBitmapTextureAtlas.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 0, 0));
-			mEnemyBitmapTextureAtlas.load();
+			mEnemy1BitmapTextureAtlas.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 0, 0));
+			mEnemy1BitmapTextureAtlas.load();
+		}
+		catch (TextureAtlasBuilderException e)
+		{
+			Debug.e(e);
+		}
+		
+		mEnemy2BitmapTextureAtlas = new BuildableBitmapTextureAtlas(
+		this.getTextureManager(), 72, 128, TextureOptions.NEAREST);
+		mEnemy2TextureRegion = BitmapTextureAtlasTextureRegionFactory.
+		createTiledFromAsset(mEnemy2BitmapTextureAtlas, this, "enemy.png", 3, 4);
+		try
+		{
+			mEnemy2BitmapTextureAtlas.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 0, 0));
+			mEnemy2BitmapTextureAtlas.load();
 		}
 		catch (TextureAtlasBuilderException e)
 		{
@@ -279,6 +301,8 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		winSprite.setVisible(false);
 		failSprite.setVisible(false);
 		
+		touch = false;
+		
 //		final float playerX = (CAMERA_WIDTH - mPlayerTextureRegion.getWidth()) / 2;
 //		final float playerY = CAMERA_HEIGHT - mPlayerTextureRegion.getHeight() - 5;
 //
@@ -303,9 +327,13 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
 		// initializing variables
 		projectileLL = new LinkedList<Sprite>();
-		targetLL = new LinkedList<AnimatedSprite>();
 		projectilesToBeAdded = new LinkedList<Sprite>();
-		TargetsToBeAdded = new LinkedList<AnimatedSprite>();
+		
+		targetLLEnemy1 = new LinkedList<AnimatedSprite>();
+		TargetsToBeAddedEnemy1 = new LinkedList<AnimatedSprite>();
+		
+		targetLLEnemy2 = new LinkedList<AnimatedSprite>();
+		TargetsToBeAddedEnemy2 = new LinkedList<AnimatedSprite>();
 		
 		objcetLL = new LinkedList<Sprite>();
 		objectsToBeAdded = new LinkedList<Sprite>();
@@ -316,10 +344,12 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 //		// repositioning the score later so we can use the score.getWidth()
 //		score.setPosition(mCamera.getWidth() - score.getWidth() - 5, 5);
 
+		//adding enemies, objects
+		createSpriteSpawnTimeHandler();
 		
-		controller.createSpriteSpawnTimeHandler();
-		controller.checkCollision();
-		controller.checkCollision1();
+		Enemy1Pool.checkCollisionEnemy1();
+		ObjectsPool.checkCollisionObject();
+		Enemy2Pool.checkCollisionEnemy2();
 
 		// starting background music
 		backgroundMusic.play();
@@ -331,6 +361,26 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		return mScene;
 	}
 
+	public void createSpriteSpawnTimeHandler()
+	{
+		TimerHandler spriteTimerHandler;
+		float mEffectSpawnDelay = 1f;
+
+		spriteTimerHandler = new TimerHandler(mEffectSpawnDelay, true, new ITimerCallback()
+		{
+					@Override
+					public void onTimePassed(TimerHandler pTimerHandler) 
+					{
+						Models.addEnemy1();
+						//Models.addEnemy2();
+						//Models.addObjects();
+					}
+				});
+
+		MainActivity.mScene.registerUpdateHandler(spriteTimerHandler);
+	}  
+
+	
 	@Override
 	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) 
 	{
@@ -339,11 +389,20 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		{
 			final float touchX = pSceneTouchEvent.getX();
 			final float touchY = pSceneTouchEvent.getY();
+			
+			touch = true;
+			
 			Models.shootProjectile(touchX, touchY);
 //			Controller.jump(player);
 			
 			return true;
 		}
+		else if(pSceneTouchEvent.getAction() == TouchEvent.ACTION_UP) 
+		{
+			touch = false;
+		}
+		
+		Debug.d("touch:"+touch);
 		return false;
 	}
 

@@ -16,9 +16,10 @@ import org.andengine.input.touch.TouchEvent;
 import org.andengine.util.modifier.IModifier;
 import org.andengine.util.modifier.IModifier.IModifierListener;
 
+import com.example.objectpool.Enemy2Pool;
 import com.example.objectpool.ObjectsPool;
 import com.example.objectpool.ProjectilesPool;
-import com.example.objectpool.TargetsPool;
+import com.example.objectpool.Enemy1Pool;
 import com.example.some.MainActivity;
 
 import android.content.Context;
@@ -34,20 +35,20 @@ public class Models
 	}
 
 	/** adds a target at a random location and let it move along the x-axis */
-	public static void addTarget() 
+	public static void addEnemy1() 
 	{
 		Random rand = new Random();
 
 		float x = (int) MainActivity.mCamera.getWidth()
-				+ MainActivity.mEnemyTextureRegion.getWidth();
-		int minY = (int)MainActivity.mEnemyTextureRegion.getHeight();
-		int maxY = (int) (MainActivity.mCamera.getHeight() - MainActivity.mEnemyTextureRegion
+				+ MainActivity.mEnemy1TextureRegion.getWidth();
+		int minY = (int)MainActivity.mEnemy1TextureRegion.getHeight();
+		int maxY = (int) (MainActivity.mCamera.getHeight() - MainActivity.mEnemy1TextureRegion
 				.getHeight());
 		int rangeY = maxY - minY;
 		int y = rand.nextInt(rangeY) + minY;
 
 		AnimatedSprite target;
-		MainActivity.tPool = new TargetsPool(MainActivity.mEnemyTextureRegion);
+		MainActivity.tPool = new Enemy1Pool(MainActivity.mEnemy1TextureRegion);
 		target = MainActivity.tPool.obtainPoolItem();
 		target.setPosition(x, y);
 		target.animate(300);
@@ -62,7 +63,40 @@ public class Models
 				-target.getWidth());
 		target.registerEntityModifier(mod.deepCopy());
 
-		MainActivity.TargetsToBeAdded.add(target);
+		MainActivity.TargetsToBeAddedEnemy1.add(target);
+
+	}
+	
+	public static void addEnemy2() 
+	{
+		Random rand = new Random();
+
+		float x = (int) MainActivity.mCamera.getWidth()
+				+ MainActivity.mEnemy2TextureRegion.getWidth();
+		int minY = (int)MainActivity.mEnemy2TextureRegion.getHeight();
+		int maxY = (int) (MainActivity.mCamera.getHeight() - MainActivity.mEnemy2TextureRegion
+				.getHeight());
+		int rangeY = maxY - minY;
+		int y = rand.nextInt(rangeY) + minY;
+
+		AnimatedSprite target;
+		MainActivity.e2Pool = new Enemy2Pool(MainActivity.mEnemy2TextureRegion);
+		target = MainActivity.e2Pool.obtainPoolItem();
+		target.setPosition(x, y);
+		target.animate(new long[]{200, 200, 200} , 9, 11, true);
+		target.setScale(3);
+		MainActivity.mScene.attachChild(target);
+
+		int minDuration = 2;
+		int maxDuration = 4;
+		int rangeDuration = maxDuration - minDuration;
+		int actualDuration = rand.nextInt(rangeDuration) + minDuration;
+
+		MoveXModifier mod = new MoveXModifier(actualDuration, target.getX(),
+				-target.getWidth());
+		target.registerEntityModifier(mod.deepCopy());
+
+		MainActivity.TargetsToBeAddedEnemy2.add(target);
 
 	}
 
@@ -101,7 +135,7 @@ public class Models
 
 		// defining a moveBymodifier from the projectile's position to the
 		// calculated one
-		MoveByModifier movMByod = new MoveByModifier(realMoveDuration, realX, realY);
+		MoveByModifier movMByod = new MoveByModifier(realMoveDuration, realX, realY-150);
 		LoopEntityModifier loopMod = new LoopEntityModifier( new RotationModifier(0.5f, 0, -360));
 
 		final ParallelEntityModifier par = new ParallelEntityModifier(movMByod, loopMod);
@@ -134,7 +168,7 @@ public class Models
 		projectile.setVisible(false);
 		MainActivity.mScene.attachChild(projectile);
 
-		MainActivity.player.animate(50, false);
+//		MainActivity.player.animate(50, false);
 //		MainActivity.player.animate(new long[] { 100, 100, 100, 100, 100, 100,
 //				100, 100, 100, 100, 100 }, 23, 33, false);
 	}
@@ -161,6 +195,8 @@ public class Models
 		};
 
 		MainActivity.mScene.registerTouchArea(MainActivity.player);
+		MainActivity.player.setScale(3);
+		MainActivity.player.animate(new long[] { 100, 100, 100}, 3, 5, true);
 	}
 
 	public static void addObjects() 
@@ -168,9 +204,9 @@ public class Models
 		Random rand = new Random();
 
 		float x = (int) MainActivity.mCamera.getWidth()
-				+ MainActivity.mEnemyTextureRegion.getWidth();
-		int minY = (int)MainActivity.mEnemyTextureRegion.getHeight();
-		int maxY = (int) (MainActivity.mCamera.getHeight() - MainActivity.mEnemyTextureRegion
+				+ MainActivity.mWinTextureRegion.getWidth();
+		int minY = (int)MainActivity.mWinTextureRegion.getHeight();
+		int maxY = (int) (MainActivity.mCamera.getHeight() - MainActivity.mWinTextureRegion
 				.getHeight());
 		int rangeY = maxY - minY;
 		int y = rand.nextInt(rangeY) + minY;
