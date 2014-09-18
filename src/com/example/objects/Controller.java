@@ -103,32 +103,5 @@ public class Controller
 //		}
 	}
 	
-	/** to restart the game and clear the whole screen */
-	public void restart(MainActivity main) 
-	{
-		main.runOnUpdateThread(new Runnable()
-		{
-			@Override
-			// to safely detach and re-attach the sprites
-			public void run()
-			{
-				MainActivity.mScene.detachChildren();
-				MainActivity.mScene.attachChild(MainActivity.player);
-//				MainActivity.mScene.attachChild(MainActivity.score);
-			}
-		});
-
-		// resetting everything
-		MainActivity.hitCount = 0;
-//		MainActivity.score.setText(String.valueOf(MainActivity.hitCount));
-		MainActivity.projectileLL.clear();
-		MainActivity.projectilesToBeAdded.clear();
-		
-		MainActivity.TargetsToBeAddedEnemy1.clear();
-		MainActivity.targetLLEnemy1.clear();
-		
-		MainActivity.TargetsToBeAddedEnemy2.clear();
-		MainActivity.targetLLEnemy2.clear();
-	}
 
 }

@@ -13,6 +13,7 @@ import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.scene.CameraScene;
 import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
@@ -20,9 +21,13 @@ import org.andengine.entity.scene.background.AutoParallaxBackground;
 import org.andengine.entity.scene.background.ParallaxBackground.ParallaxEntity;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
+import org.andengine.entity.text.TextOptions;
 import org.andengine.entity.util.FPSLogger;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.input.touch.controller.MultiTouch;
+import org.andengine.opengl.font.Font;
+import org.andengine.opengl.font.FontFactory;
 import org.andengine.opengl.texture.TextureOptions;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
@@ -35,6 +40,7 @@ import org.andengine.opengl.texture.region.TextureRegion;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.ui.activity.SimpleBaseGameActivity;
+import org.andengine.util.HorizontalAlign;
 import org.andengine.util.debug.Debug;
 
 import com.example.objectpool.Enemy2Pool;
@@ -44,14 +50,16 @@ import com.example.objectpool.Enemy1Pool;
 import com.example.objects.Controller;
 import com.example.objects.Models;
 
+import android.graphics.Color;
+import android.opengl.GLES20;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
 public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouchListener
 {
 
-	private static final int CAMERA_WIDTH = 720;
-	private static final int CAMERA_HEIGHT = 480;
+	public static final int CAMERA_WIDTH = 720;
+	public static final int CAMERA_HEIGHT = 480;
 
 	public static Camera mCamera;
 	public static Sound shootingSound;
@@ -114,6 +122,11 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 					   mBitmapTextureAtlasFail, mBitmapTextureAtlasProjectile;
 	
 	public static boolean touch;
+	
+    public static Font mFont;
+    public static int mScore = 0;
+    public static Text mScoreText;
+	
 	@Override
 	public EngineOptions onCreateEngineOptions() 
 	{
@@ -260,6 +273,10 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		FontFactory.setAssetBasePath("font/");
+		this.mFont = FontFactory.createFromAsset(this.getFontManager(), this.getTextureManager(), 512, 512, TextureOptions.BILINEAR, this.getAssets(), "Plok.ttf", 32, true, Color.WHITE);
+		this.mFont.load();
 	}
 
 	@Override
@@ -349,21 +366,17 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 		
 		// starting background music
 		backgroundMusic.play();
-//		runningFlag = true;
-//		pauseFlag = false;
 		
-		controller.restart(this);
-
 		return mScene;
 	}
 
 	public void startGame()
 	{
+		/* The ScoreText showing how many points the pEntity scored. */
 		
 		Enemy1Pool.checkCollisionEnemy1();
-		ObjectsPool.checkCollisionObject();
 		Enemy2Pool.checkCollisionEnemy2();
-		
+		ObjectsPool.checkCollisionObject();
 		
 		TimerHandler spriteTimerHandler;
 		float mEffectSpawnDelay = 1f;
@@ -376,12 +389,44 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 						Models.addEnemy1();
 						Models.addEnemy2();
 						Models.addObjects();
+						
 					}
 				});
 
-		MainActivity.mScene.registerUpdateHandler(spriteTimerHandler);
+		mScene.registerUpdateHandler(spriteTimerHandler);
+		
+		restart(this);
+		
 	}  
+	
+	/** to restart the game and clear the whole screen */
+	public void restart(MainActivity main) 
+	{
+		main.runOnUpdateThread(new Runnable()
+		{
+			@Override
+			// to safely detach and re-attach the sprites
+			public void run()
+			{
+				mScene.detachChildren();
+				mScene.attachChild(player);
+				
+				Util.setScore();
+			}
+		});
 
+		// resetting everything
+		hitCount = 0;
+//		score.setText(String.valueOf(hitCount));
+		projectileLL.clear();
+		projectilesToBeAdded.clear();
+		
+		TargetsToBeAddedEnemy1.clear();
+		targetLLEnemy1.clear();
+		
+		TargetsToBeAddedEnemy2.clear();
+		targetLLEnemy2.clear();
+	}
 	
 	@Override
 	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) 
@@ -511,7 +556,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 			{
 				mScene.clearChildScene(); 
 				mEngine.start();
-				controller.restart(this);
+				restart(this);
 				return true;
 			}
 			return super.onKeyDown(pKeyCode, pEvent);
