@@ -395,6 +395,7 @@ public class MainActivity extends SimpleBaseGameActivity implements IOnSceneTouc
 
 		mScene.registerUpdateHandler(spriteTimerHandler);
 		
+		//set restart
 		restart(this);
 		
 	}  
